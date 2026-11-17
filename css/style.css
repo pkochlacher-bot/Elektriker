@@ -68,7 +68,7 @@ a { color: var(--brand); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 p { margin: 0 0 1em; }
-h1, h2, h3, h4 { margin: 0; font-family: var(--font-display); color: var(--ink); text-wrap: balance; }
+h1, h2, h3, h4 { margin: 0; font-family: var(--font-display); color: var(--ink); text-wrap: balance; overflow-wrap: break-word; }
 p, li { text-wrap: pretty; }
 
 :focus-visible {
@@ -129,7 +129,7 @@ p, li { text-wrap: pretty; }
 }
 
 .display {
-  font-size: clamp(2.75rem, 1.55rem + 5vw, 5.25rem);
+  font-size: clamp(2.25rem, 1.2rem + 5.6vw, 5.25rem);
   line-height: 1.03;
   letter-spacing: -0.04em;
   font-weight: 700;
@@ -308,7 +308,12 @@ p, li { text-wrap: pretty; }
   transition: transform 160ms var(--ease-out);
 }
 .menu-toggle:active { transform: scale(0.94); }
-.menu-toggle .bar { transition: transform 220ms var(--ease-out), opacity 150ms ease; transform-origin: center; }
+/* fill-box: jede Linie dreht sich um ihre eigene Mitte – sonst verzieht Safari das X */
+.menu-toggle .bar {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 220ms var(--ease-out), opacity 150ms ease;
+}
 .menu-toggle[aria-expanded="true"] .bar-1 { transform: translateY(4px) rotate(45deg); }
 .menu-toggle[aria-expanded="true"] .bar-2 { transform: translateY(-4px) rotate(-45deg); }
 
@@ -566,7 +571,9 @@ body { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
 .rows li + li { border-top: 1px solid var(--line); }
 .row-link {
   display: grid;
-  grid-template-columns: 44px 1fr 20px;
+  grid-template-columns: 44px minmax(0, 1fr) 20px;
+  hyphens: auto;
+  -webkit-hyphens: auto;
   gap: 16px;
   align-items: center;
   padding: 18px 4px;
@@ -856,6 +863,7 @@ body { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
 
 .contact-layout {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);   /* Spalte darf nie breiter als der Bildschirm werden */
   gap: 32px;
   align-items: start;
 }
@@ -892,10 +900,6 @@ body { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
   grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 10px;
 }
-@media (max-width: 639px) {
-  .topic-options { grid-template-columns: 1fr 1fr; }
-  .topic-option label { min-height: 64px; padding: 10px 12px; font-size: 0.875rem; }
-}
 .topic-option { position: relative; }
 .action-bar.single { grid-template-columns: 1fr; }
 .topic-option input {
@@ -916,6 +920,22 @@ body { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
   line-height: 1.3;
   cursor: pointer;
   transition: background-color 180ms ease, box-shadow 180ms ease, color 180ms ease, transform 160ms var(--ease-out);
+}
+@media (max-width: 639px) {
+  .topic-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Symbol über dem Text, damit lange Wörter wie „Photovoltaik-Anschluss“ Platz haben */
+  .topic-option label {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 6px;
+    min-height: 76px;
+    padding: 12px;
+    font-size: 0.875rem;
+    hyphens: manual;
+    overflow-wrap: break-word;
+  }
+  .form-card { padding: 24px 20px; }
 }
 .topic-option label .icon-s { color: var(--brand); transition: color 180ms ease; }
 .topic-option label:active { transform: scale(0.98); }
@@ -1134,6 +1154,10 @@ body { padding-bottom: calc(70px + env(safe-area-inset-bottom)); }
   border-top: 1px solid var(--line);
   display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between;
 }
+
+/* Rasterzellen dürfen schmaler werden als ihr längstes Wort – verhindert seitliches Verschieben am Handy */
+.tiles > *, .panel > *, .explain > *, .service > *, .steps > *,
+.footer-grid > *, .contact-band > *, .contact-layout > *, .fields > * { min-width: 0; }
 
 /* ---------- Bewegung reduzieren ---------- */
 
